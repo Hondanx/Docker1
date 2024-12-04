@@ -7,7 +7,7 @@ const app = express();
 console.log("Starting the server...");  // Debugging log
 
 // Define route
-app.get('/', (req, res) => res.send('<h1>Hello Buddy!</h1>'));
+app.get('/', (req, res) => res.send('<h1>Hello Buddy....!</h1>'));
 
 // Start server
 app.listen(port, () => {
