@@ -1,0 +1,8 @@
+exit
+show dbs
+showdbs
+exit
+db.books.insert({ title: "book 1" })
+db.books.insert({title "book 1"})
+use testdb
+show dbs
