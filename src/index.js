@@ -1,112 +1,73 @@
+// Import required modules
 const express = require('express');
-const mongoose = require('mongoose');
+const { Client } = require('pg');
 const redis = require('redis');
-const { Client } = require('pg'); // Import the pg library for PostgreSQL
-require('dotenv').config(); // Load environment variables from .env file
 
 // Initialize the app
 const app = express();
 const port = process.env.PORT || 4000;
 
-// Redis Configuration
+// PostgreSQL connection parameters
+const pgUser = process.env.PG_USER || 'root'; // Use environment variable or default to 'root'
+const pgPassword = process.env.PG_PASSWORD || '1923'; // Use environment variable or default to '1923'
+//const pgDatabase = process.env.PG_DATABASE || 'mydb'; // Use environment variable or default to 'mydb'
+const pgHost = 'postgres'; // The PostgreSQL service name from docker-compose
+const pgPort = 5432; // Default PostgreSQL port
+
+// PostgreSQL connection URI (this can be useful if you want to pass it as a string)
+const uri = `postgresql://${pgUser}:${pgPassword}@${pgHost}:${pgPort}`;
+
+// Create a connection to PostgreSQL using URI
+const pgClient = new Client({
+  connectionString: uri,
+});
+pgClient
+  .connect()
+  .then(() => console.log('Connected to postgress'))
+  .catch((err) => console.log('Failed to connect to postgres : ',err));
+// Create a connection to Redis
 const redisClient = redis.createClient({
-  url: 'redis://redis:6379', // Use Docker service name "redis"
+  host: 'redis', // Redis service name from docker-compose
+  port: 6379,
 });
 
-redisClient.on('error', (err) => console.error('Redis client error:', err));
-redisClient.on('connect', () => console.log('Connected to Redis'));
-
-// MongoDB Configuration (commented out for PostgreSQL)
-const mongoUri = process.env.MONGO_URI || "mongodb://root:1923@mongo:27017/mydb";
-
-// PostgreSQL Configuration (updated to use Docker DNS and the same user/password as MongoDB)
-const postgresClient = new Client({
-  connectionString: process.env.DATABASE_URL || "postgres://root:1923@postgres:5432/mydb",
+// Middleware to check Redis connectivity
+redisClient.on('connect', function () {
+  console.log('Connected to Redis');
 });
 
-postgresClient.on('error', (err) => console.error('PostgreSQL client error:', err));
-postgresClient.on('connect', () => console.log('Connected to PostgreSQL'));
-
-// Initialize Redis and PostgreSQL connections, then start the server
-(async () => {
-  try {
-    // Connect to Redis
-    await redisClient.connect();
-    console.log('Redis client connected successfully');
-
-    // Connect to PostgreSQL (using Docker internal DNS resolution for "postgres" service)
-    await postgresClient.connect();
-    console.log("Successfully connected to PostgreSQL!");
-
-    // Connect to MongoDB (commented out for PostgreSQL)
-    /*
-    await mongoose.connect(mongoUri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      authSource: "admin", // Necessary for authentication with the root user
-    });
-    console.log("Successfully connected to MongoDB using Mongoose!");
-    */
-
-    // Start the Express server
-    app.listen(port, () => {
-      console.log(`App is running on port ${port}`);
-    });
-  } catch (error) {
-    console.error("Error during initialization:", error);
-    process.exit(1); // Exit the app if initialization fails
-  }
-})();
-
-// Define routes
-app.get('/', (req, res) => {
-  res.send('<h1>Hello, Buddy!..How are you?</h1>');
+redisClient.on('error', function (err) {
+  console.log('Redis error: ' + err);
 });
 
-// Route to test PostgreSQL connection (instead of MongoDB)
+// Route to test PostgreSQL connection
 app.get('/test-postgres', async (req, res) => {
   try {
-    // Create a table for testing if not exists (if you don't have one already)
-    await postgresClient.query(`
-      CREATE TABLE IF NOT EXISTS tests (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(100),
-        age INT
-      );
-    `);
-
-    // Insert a row into the "tests" table
-    await postgresClient.query("INSERT INTO tests (name, age) VALUES ($1, $2)", ['John Doe', 30]);
-
-    // Fetch all rows from the "tests" table
-    const result = await postgresClient.query("SELECT * FROM tests");
-    res.json(result.rows); // Send the rows back as JSON
-  } catch (error) {
-    console.error("Error interacting with PostgreSQL:", error);
-    res.status(500).send("Failed to interact with PostgreSQL");
+    const result = await pool.query('SELECT NOW()');
+    res.json({ message: 'PostgreSQL connection is working', time: result.rows[0].now });
+  } catch (err) {
+    console.error('Error connecting to PostgreSQL', err);
+    res.status(500).json({ error: 'Failed to connect to PostgreSQL' });
   }
 });
 
-// MongoDB section (commented out)
-/*
-const testSchema = new mongoose.Schema({
-  name: String,
-  age: Number,
+// Route to test Redis connection
+app.get('/test-redis', (req, res) => {
+  redisClient.get('test_key', (err, reply) => {
+    if (err) {
+      console.error('Error connecting to Redis', err);
+      return res.status(500).json({ error: 'Failed to connect to Redis' });
+    }
+    res.json({ message: 'Redis connection is working', value: reply });
+  });
 });
-const Test = mongoose.model("Test", testSchema);
 
-app.get('/test-mongo', async (req, res) => {
-  try {
-    // Insert a document into the "tests" collection
-    const newTest = new Test({ name: "John Doe", age: 30 });
-    await newTest.save();
-
-    // Fetch all documents from the "tests" collection
-    const tests = await Test.find();
-    res.json(tests);
-  } catch (error) {
-    console.error("Error interacting with MongoDB:", error);
-    res.status(500).send("Failed to interact with MongoDB");
-  }
+// Basic route to check if the server is up
+app.get('/', (req, res) => {
+  res.send('Hello, this is the Node.js app running inside Docker!');
 });
-*/
+
+// Start the server
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
