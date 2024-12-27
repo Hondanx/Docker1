@@ -2,6 +2,7 @@ version: "3.8"
 services:
   node-app:
     container_name: express_node
+    image: hondanx/dockernode
     build:
       context: .
     ports:
