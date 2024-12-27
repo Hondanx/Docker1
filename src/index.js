@@ -40,16 +40,6 @@ redisClient.on('error', function (err) {
   console.log('Redis error: ' + err);
 });
 
-// Route to test PostgreSQL connection
-app.get('/test-postgres', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT NOW()');
-    res.json({ message: 'PostgreSQL connection is working', time: result.rows[0].now });
-  } catch (err) {
-    console.error('Error connecting to PostgreSQL', err);
-    res.status(500).json({ error: 'Failed to connect to PostgreSQL' });
-  }
-});
 
 // Route to test Redis connection
 app.get('/test-redis', (req, res) => {
@@ -64,7 +54,7 @@ app.get('/test-redis', (req, res) => {
 
 // Basic route to check if the server is up
 app.get('/', (req, res) => {
-  res.send('Hello, this is the Node.js app running inside Docker!');
+  res.send('Hello, this is the Node.js app running inside Docker! and also using docker hub');
 });
 
 // Start the server
