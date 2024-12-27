@@ -2,6 +2,7 @@
 const express = require('express');
 const { Client } = require('pg');
 const redis = require('redis');
+const os = require('os');
 
 // Initialize the app
 const app = express();
@@ -54,6 +55,7 @@ app.get('/test-redis', (req, res) => {
 
 // Basic route to check if the server is up
 app.get('/', (req, res) => {
+  console.log('traffic from ${os.hostname}')
   res.send('Hello, this is the Node.js app running inside Docker! and also using docker hub');
 });
 
