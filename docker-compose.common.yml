@@ -19,8 +19,8 @@ services:
     depends_on:
       - postgres
       - redis
-    networks:
-      - app_network
+#    networks:
+#      - app_network
 
   # mongo:
   #   image: mongo
@@ -51,8 +51,8 @@ services:
   redis:
     image: redis
     restart: always
-    networks:
-      - app_network
+#    networks:
+#      - app_network
 
   web:
     image: nginx
@@ -62,8 +62,8 @@ services:
       - "80:80"
     depends_on:
       - node-app
-    networks:
-      - app_network
+#    networks:
+#      - app_network
   postgres:
     image: postgres
     restart: always
@@ -73,8 +73,8 @@ services:
     #command: ["sh", "-c", "psql -U root -c 'CREATE DATABASE mydb;' && docker-entrypoint.sh postgres"]
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
-    networks:
-      - app_network
+#    networks:
+#      - app_network
   
   watchtower:
     image: containrrr/watchtower
@@ -86,11 +86,11 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     command:
       - docker1_node-app_1
-    networks:
-      - app_network
+#    networks:
+ #     - app_network
 
 
-networks:
-  app_network:
-    driver: overlay
-    attachable: true
+#networks:
+#  app_network:
+#    driver: overlay
+#    attachable: true

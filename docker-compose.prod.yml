@@ -9,11 +9,11 @@ services:
    environment:
       - NOD_ENV=PROD
    command: ["npm","start"]
-   networks:
-    - app_network
+#   networks:
+#    - app_network
 
 
-networks:
-  app_network:
-    driver: overlay
-    attachable: true
+#networks:
+#  app_network:
+#    driver: overlay
+#    attachable: true
