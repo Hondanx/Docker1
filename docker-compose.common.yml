@@ -8,6 +8,14 @@ services:
     
     env_file:
       - ./.env
+    deploy:
+      replicas: 4
+      restart_policy:
+        condition: on-failure
+      update_config:
+        parallelism: 2
+        delay: 10s
+        failure_action: rollback
     depends_on:
       - postgres
       - redis
@@ -65,6 +73,19 @@ services:
     #command: ["sh", "-c", "psql -U root -c 'CREATE DATABASE mydb;' && docker-entrypoint.sh postgres"]
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+  
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    environment:
+      - WATCHTOWER_TRACE=TRUE
+      - WATCHTOWER_POLL_INTERVAL=30
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command:
+      - docker1_node-app_1
     networks:
       - app_network
 
