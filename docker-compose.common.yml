@@ -75,16 +75,16 @@ services:
 #    networks:
 #      - app_network
   
-  watchtower:
-    image: containrrr/watchtower
-    container_name: watchtower
-    environment:
-      - WATCHTOWER_TRACE=TRUE
-      - WATCHTOWER_POLL_INTERVAL=500
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    command:
-      - docker1_node-app_1
+#  watchtower:
+#    image: containrrr/watchtower
+#    container_name: watchtower
+#    environment:
+#      - WATCHTOWER_TRACE=TRUE
+#      - WATCHTOWER_POLL_INTERVAL=500
+#    volumes:
+#      - /var/run/docker.sock:/var/run/docker.sock
+#    command:
+#      - docker1_node-app_1
 #    networks:
  #     - app_network
 
