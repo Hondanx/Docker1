@@ -92,4 +92,4 @@ services:
 
 networks:
   app_network:
-    driver: bridge
+    driver: overlay
