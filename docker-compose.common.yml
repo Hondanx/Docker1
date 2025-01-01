@@ -9,12 +9,12 @@ services:
     env_file:
       - ./.env
     deploy:
-      replicas: 2
+      replicas: 4
       restart_policy:
         condition: on-failure
       update_config:
-        parallelism: 1
-        delay: 10s
+        parallelism: 2
+        delay: 30s
         failure_action: rollback
     depends_on:
       - postgres
