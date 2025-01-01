@@ -56,7 +56,7 @@ app.get('/test-redis', (req, res) => {
 // Basic route to check if the server is up
 app.get('/', (req, res) => {
   console.log('traffic from ${os.hostname}')
-  res.send('Hello, this is the Node.js app running inside Docker! and also using docker hub and u can see changes by docker swarm');
+  res.send('Hello, this is the Node.js app running and u can see changes by docker swarm');
 });
 
 // Start the server
